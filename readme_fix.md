@@ -1,4 +1,4 @@
-# pb2025_sentry_nav 算法详解
+# Navi_Simulation 算法详解
 
 ## 目录
 1. [项目概述](#项目概述)
