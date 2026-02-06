@@ -18,7 +18,7 @@
 
 ## 项目概述
 
-pb2025_sentry_nav 是基于 NAV2 导航框架开发的哨兵机器人导航系统，专为 RoboMaster 2025 设计。该系统采用 Livox Mid360 激光雷达作为主要传感器，通过点云里程计（point_lio）进行定位，并结合地形分析算法实现自主导航。
+pb2025_sentry_nav 是基于 NAV2 导航框架开发的机器人导航系统，该系统采用 Livox Mid360 激光雷达作为主要传感器，通过点云里程计（point_lio）进行定位，并结合地形分析算法实现自主导航。
 
 **核心特点：**
 - 采用倾斜安装的 Livox Mid360 激光雷达
@@ -33,26 +33,94 @@ pb2025_sentry_nav 是基于 NAV2 导航框架开发的哨兵机器人导航系�
 
 ### 整体数据流
 
-```
-传感器数据 → 点云处理 → 坐标变换 → 地形分析 → 导航规划
-    ↓            ↓           ↓           ↓          ↓
-Livox Mid360  点云转换   TF变换链   障碍物高度   NAV2
+```mermaid
+graph TB
+    subgraph 传感器层
+        A[Livox Mid360<br/>激光雷达]
+    end
+
+    subgraph 点云处理层
+        B[ign_sim_pointcloud_tool<br/>添加time和ring字段]
+    end
+
+    subgraph 里程计层
+        C[point_lio<br/>激光里程计估计]
+        D[loam_interface<br/>lidar_odom→odom转换]
+    end
+
+    subgraph 坐标变换层
+        E[sensor_scan_generation<br/>odom→front_mid360<br/>odom→chassis]
+        F[fake_vel_transform<br/>速度坐标变换]
+    end
+
+    subgraph 地形分析层
+        G[terrain_analysis<br/>近程4m地形分析]
+        H[terrain_analysis_ext<br/>远程地形分析]
+    end
+
+    subgraph 导航规划层
+        I[NAV2<br/>导航规划与控制]
+    end
+
+    A -->|点云数据| B
+    B -->|带时间戳的点云| C
+    C -->|lidar_odom坐标系| D
+    D -->|odom坐标系| E
+    E -->|front_mid360坐标系点云| G
+    G -->|地形地图| H
+    H -->|完整地形地图| I
+    I -->|速度指令| F
+    F -->|变换后的速度| A
+
+    style A fill:#e1f5ff
+    style B fill:#b3e5fc
+    style C fill:#90caf9
+    style D fill:#64b5f6
+    style E fill:#42a5f5
+    style F fill:#2196f3
+    style G fill:#1e88e5
+    style H fill:#1976d2
+    style I fill:#1565c0
 ```
 
 ### 模块依赖关系
 
-```
-point_lio (外部依赖)
-    ↓
-loam_interface (lidar_odom → odom)
-    ↓
-sensor_scan_generation (odom → front_mid360, odom → chassis)
-    ↓
-terrain_analysis (近程4m地形)
-    ↓
-terrain_analysis_ext (远程地形)
-    ↓
-NAV2 导航系统
+```mermaid
+graph TB
+    subgraph 外部依赖
+        A[point_lio<br/>激光里程计算法]
+    end
+
+    subgraph 坐标转换模块
+        B[loam_interface<br/>lidar_odom→odom]
+        C[sensor_scan_generation<br/>多坐标系转换]
+        D[fake_vel_transform<br/>速度变换]
+    end
+
+    subgraph 地形分析模块
+        E[terrain_analysis<br/>近程4m地形]
+        F[terrain_analysis_ext<br/>远程地形]
+    end
+
+    subgraph 导航系统
+        G[NAV2<br/>导航框架]
+    end
+
+    A -->|输出:<br/>- lidar_odometry<br/>- registered_scan| B
+    B -->|输出:<br/>- lidar_odometry<br/>- registered_scan<br/>(odom坐标系)| C
+    C -->|输出:<br/>- sensor_scan<br/>- odometry<br/>- TF: odom→chassis| E
+    E -->|输出:<br/>- terrain_map| F
+    F -->|输出:<br/>- terrain_map_ext| G
+    G -->|输出:<br/>- cmd_vel| D
+    D -->|输出:<br/>- cmd_vel_chassis| A
+
+    style A fill:#ff6b6b
+    style B fill:#4ecdc4
+    style C fill:#45b7d1
+    style D fill:#96ceb4
+    style E fill:#ffeaa7
+    style F fill:#fdcb6e
+    style G fill:#dfe6e9
 ```
 
 ---
