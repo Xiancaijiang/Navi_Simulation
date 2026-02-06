@@ -88,31 +88,31 @@ graph TB
 ```mermaid
 graph TB
     subgraph 外部依赖
-        A[point_lio<br/>激光里程计算法]
+        A[point_lio 激光里程计算法]
     end
 
     subgraph 坐标转换模块
-        B[loam_interface<br/>lidar_odom→odom]
-        C[sensor_scan_generation<br/>多坐标系转换]
-        D[fake_vel_transform<br/>速度变换]
+        B[loam_interface lidar_odom转odom]
+        C[sensor_scan_generation 多坐标系转换]
+        D[fake_vel_transform 速度变换]
     end
 
     subgraph 地形分析模块
-        E[terrain_analysis<br/>近程4m地形]
-        F[terrain_analysis_ext<br/>远程地形]
+        E[terrain_analysis 近程4m地形]
+        F[terrain_analysis_ext 远程地形]
     end
 
     subgraph 导航系统
-        G[NAV2<br/>导航框架]
+        G[NAV2 导航框架]
     end
 
-    A -->|输出:<br/>- lidar_odometry<br/>- registered_scan| B
-    B -->|输出:<br/>- lidar_odometry<br/>- registered_scan<br/>(odom坐标系)| C
-    C -->|输出:<br/>- sensor_scan<br/>- odometry<br/>- TF: odom→chassis| E
-    E -->|输出:<br/>- terrain_map| F
-    F -->|输出:<br/>- terrain_map_ext| G
-    G -->|输出:<br/>- cmd_vel| D
-    D -->|输出:<br/>- cmd_vel_chassis| A
+    A -->|输出: lidar_odometry, registered_scan| B
+    B -->|输出: lidar_odometry, registered_scan(odom坐标系)| C
+    C -->|输出: sensor_scan, odometry, TF: odom到chassis| E
+    E -->|输出: terrain_map| F
+    F -->|输出: terrain_map_ext| G
+    G -->|输出: cmd_vel| D
+    D -->|输出: cmd_vel_chassis| A
 
     style A fill:#ff6b6b
     style B fill:#4ecdc4
