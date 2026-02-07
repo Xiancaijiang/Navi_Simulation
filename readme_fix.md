@@ -36,30 +36,30 @@ pb2025_sentry_nav 是基于 NAV2 导航框架开发的机器人导航系统，�
 ```mermaid
 graph TB
     subgraph 传感器层
-        A[Livox Mid360<br/>激光雷达]
+        A[Livox Mid360 激光雷达]
     end
 
     subgraph 点云处理层
-        B[ign_sim_pointcloud_tool<br/>添加time和ring字段]
+        B[ign_sim_pointcloud_tool 添加time和ring字段]
     end
 
     subgraph 里程计层
-        C[point_lio<br/>激光里程计估计]
-        D[loam_interface<br/>lidar_odom→odom转换]
+        C[point_lio 激光里程计估计]
+        D[loam_interface lidar_odom转odom]
     end
 
     subgraph 坐标变换层
-        E[sensor_scan_generation<br/>odom→front_mid360<br/>odom→chassis]
-        F[fake_vel_transform<br/>速度坐标变换]
+        E[sensor_scan_generation 多坐标系转换]
+        F[fake_vel_transform 速度坐标变换]
     end
 
     subgraph 地形分析层
-        G[terrain_analysis<br/>近程4m地形分析]
-        H[terrain_analysis_ext<br/>远程地形分析]
+        G[terrain_analysis 近程4m地形分析]
+        H[terrain_analysis_ext 远程地形分析]
     end
 
     subgraph 导航规划层
-        I[NAV2<br/>导航规划与控制]
+        I[NAV2 导航规划与控制]
     end
 
     A -->|点云数据| B
@@ -106,13 +106,13 @@ graph TB
         G[NAV2 导航框架]
     end
 
-    A -->|输出: lidar_odometry, registered_scan| B
-    B -->|输出: lidar_odometry, registered_scan(odom坐标系)| C
-    C -->|输出: sensor_scan, odometry, TF: odom到chassis| E
-    E -->|输出: terrain_map| F
-    F -->|输出: terrain_map_ext| G
-    G -->|输出: cmd_vel| D
-    D -->|输出: cmd_vel_chassis| A
+    A --> B
+    B --> C
+    C --> E
+    E --> F
+    F --> G
+    G --> D
+    D --> A
 
     style A fill:#ff6b6b
     style B fill:#4ecdc4
